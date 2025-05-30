@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_USER: postgres
+      POSTGRES_DB: tasks_db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tasks_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  graphql-engine:
+    image: hasura/graphql-engine:v2.27.0
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/tasks_db
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: "mysupersecretkey"
+      HASURA_GRAPHQL_DEV_MODE: "false"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  hasura-init:
+    image: postgres:13-alpine
+    depends_on:
+      - postgres
+      - graphql-engine
+    volumes:
+      - ./hasura/migrations:/migrations
+      - ./init-hasura.sh:/init-hasura.sh
+    command: ["sh", "/init-hasura.sh"]
+    restart: on-failure
+
+volumes:
+  db_data:

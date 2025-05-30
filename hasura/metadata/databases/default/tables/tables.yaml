@@ -1,0 +1,88 @@
+- table:
+    schema: public
+    name: labels
+  array_relationships:
+  - name: task_labels
+    using:
+      foreign_key_constraint_on:
+        column: label_id
+        table:
+          schema: public
+          name: task_labels
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - id
+      - caption
+      - color
+      filter: {}
+      allow_aggregations: true
+
+- table:
+    schema: public
+    name: task_labels
+  object_relationships:
+  - name: label
+    using:
+      foreign_key_constraint_on: label_id
+  - name: task
+    using:
+      foreign_key_constraint_on: task_id
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - label_id
+      - task_id
+      filter: {}
+      allow_aggregations: true
+
+- table:
+    schema: public
+    name: tasks
+  object_relationships:
+  - name: assignee
+    using:
+      foreign_key_constraint_on: assignee_id
+  array_relationships:
+  - name: task_labels
+    using:
+      foreign_key_constraint_on:
+        column: task_id
+        table:
+          schema: public
+          name: task_labels
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - id
+      - title
+      - description
+      - assignee_id
+      - created_at
+      filter: {}
+      allow_aggregations: true
+
+- table:
+    schema: public
+    name: users
+  array_relationships:
+  - name: tasks
+    using:
+      foreign_key_constraint_on:
+        column: assignee_id
+        table:
+          schema: public
+          name: tasks
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - id
+      - first_name
+      - last_name
+      - bio
+      filter: {}
+      allow_aggregations: true 

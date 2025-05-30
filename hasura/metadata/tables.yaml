@@ -1,0 +1,50 @@
+- table:
+    schema: public
+    name: users
+  array_relationships:
+    - name: tasks
+      using:
+        foreign_key_constraint_on:
+          column: assignee_id
+          table:
+            schema: public
+            name: tasks
+
+- table:
+    schema: public
+    name: labels
+  array_relationships:
+    - name: task_labels
+      using:
+        foreign_key_constraint_on:
+          column: label_id
+          table:
+            schema: public
+            name: task_labels
+
+- table:
+    schema: public
+    name: tasks
+  object_relationships:
+    - name: assignee
+      using:
+        foreign_key_constraint_on: assignee_id
+  array_relationships:
+    - name: task_labels
+      using:
+        foreign_key_constraint_on:
+          column: task_id
+          table:
+            schema: public
+            name: task_labels
+
+- table:
+    schema: public
+    name: task_labels
+  object_relationships:
+    - name: task
+      using:
+        foreign_key_constraint_on: task_id
+    - name: label
+      using:
+        foreign_key_constraint_on: label_id 
